@@ -1,5 +1,5 @@
-# R_basic_tutorial_2021Mar
+# Basic BLAST workshop on ISU Nova hpc
 
 
 
-Tutorial website: https://jialiu232.github.io/R_basic_tutorial_2021Mar/
+Tutorial website: https://jialiu232.github.io/Basic_BLAST_workshop_2023Dec/
