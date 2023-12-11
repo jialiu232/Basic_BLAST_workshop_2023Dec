@@ -1,0 +1,17 @@
+name: "BLAST"
+output_dir: "."
+navbar:
+  title: "BLAST"
+  left:
+    - text: "Home"
+      href: index.html
+    - text: "Basic BLAST"
+      href: basic_BLAST.html
+output:
+  html_document:
+    theme: sandstone
+    css: style.css
+    
+    
+    
+    

@@ -1,0 +1,706 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<meta charset="utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+
+
+
+<title>Basic BLAST</title>
+
+<script src="site_libs/header-attrs-2.25/header-attrs.js"></script>
+<script src="site_libs/jquery-3.6.0/jquery-3.6.0.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link href="site_libs/bootstrap-3.3.5/css/sandstone.min.css" rel="stylesheet" />
+<script src="site_libs/bootstrap-3.3.5/js/bootstrap.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/respond.min.js"></script>
+<style>h1 {font-size: 34px;}
+       h1.title {font-size: 38px;}
+       h2 {font-size: 30px;}
+       h3 {font-size: 24px;}
+       h4 {font-size: 18px;}
+       h5 {font-size: 16px;}
+       h6 {font-size: 12px;}
+       code {color: inherit; background-color: rgba(0, 0, 0, 0.04);}
+       pre:not([class]) { background-color: white }</style>
+<script src="site_libs/jqueryui-1.13.2/jquery-ui.min.js"></script>
+<link href="site_libs/tocify-1.9.1/jquery.tocify.css" rel="stylesheet" />
+<script src="site_libs/tocify-1.9.1/jquery.tocify.js"></script>
+<script src="site_libs/navigation-1.1/tabsets.js"></script>
+<link href="site_libs/highlightjs-9.12.0/default.css" rel="stylesheet" />
+<script src="site_libs/highlightjs-9.12.0/highlight.js"></script>
+
+<style type="text/css">
+  code{white-space: pre-wrap;}
+  span.smallcaps{font-variant: small-caps;}
+  span.underline{text-decoration: underline;}
+  div.column{display: inline-block; vertical-align: top; width: 50%;}
+  div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+  ul.task-list{list-style: none;}
+    </style>
+
+<style type="text/css">code{white-space: pre;}</style>
+<script type="text/javascript">
+if (window.hljs) {
+  hljs.configure({languages: []});
+  hljs.initHighlightingOnLoad();
+  if (document.readyState && document.readyState === "complete") {
+    window.setTimeout(function() { hljs.initHighlighting(); }, 0);
+  }
+}
+</script>
+
+
+
+
+
+
+<link rel="stylesheet" href="style.css" type="text/css" />
+
+
+
+<style type = "text/css">
+.main-container {
+  max-width: 940px;
+  margin-left: auto;
+  margin-right: auto;
+}
+img {
+  max-width:100%;
+}
+.tabbed-pane {
+  padding-top: 12px;
+}
+.html-widget {
+  margin-bottom: 20px;
+}
+button.code-folding-btn:focus {
+  outline: none;
+}
+summary {
+  display: list-item;
+}
+details > summary > p:only-child {
+  display: inline;
+}
+pre code {
+  padding: 0;
+}
+</style>
+
+
+<style type="text/css">
+.dropdown-submenu {
+  position: relative;
+}
+.dropdown-submenu>.dropdown-menu {
+  top: 0;
+  left: 100%;
+  margin-top: -6px;
+  margin-left: -1px;
+  border-radius: 0 6px 6px 6px;
+}
+.dropdown-submenu:hover>.dropdown-menu {
+  display: block;
+}
+.dropdown-submenu>a:after {
+  display: block;
+  content: " ";
+  float: right;
+  width: 0;
+  height: 0;
+  border-color: transparent;
+  border-style: solid;
+  border-width: 5px 0 5px 5px;
+  border-left-color: #cccccc;
+  margin-top: 5px;
+  margin-right: -10px;
+}
+.dropdown-submenu:hover>a:after {
+  border-left-color: #adb5bd;
+}
+.dropdown-submenu.pull-left {
+  float: none;
+}
+.dropdown-submenu.pull-left>.dropdown-menu {
+  left: -100%;
+  margin-left: 10px;
+  border-radius: 6px 0 6px 6px;
+}
+</style>
+
+<script type="text/javascript">
+// manage active state of menu based on current page
+$(document).ready(function () {
+  // active menu anchor
+  href = window.location.pathname
+  href = href.substr(href.lastIndexOf('/') + 1)
+  if (href === "")
+    href = "index.html";
+  var menuAnchor = $('a[href="' + href + '"]');
+
+  // mark the anchor link active (and if it's in a dropdown, also mark that active)
+  var dropdown = menuAnchor.closest('li.dropdown');
+  if (window.bootstrap) { // Bootstrap 4+
+    menuAnchor.addClass('active');
+    dropdown.find('> .dropdown-toggle').addClass('active');
+  } else { // Bootstrap 3
+    menuAnchor.parent().addClass('active');
+    dropdown.addClass('active');
+  }
+
+  // Navbar adjustments
+  var navHeight = $(".navbar").first().height() + 15;
+  var style = document.createElement('style');
+  var pt = "padding-top: " + navHeight + "px; ";
+  var mt = "margin-top: -" + navHeight + "px; ";
+  var css = "";
+  // offset scroll position for anchor links (for fixed navbar)
+  for (var i = 1; i <= 6; i++) {
+    css += ".section h" + i + "{ " + pt + mt + "}\n";
+  }
+  style.innerHTML = "body {" + pt + "padding-bottom: 40px; }\n" + css;
+  document.head.appendChild(style);
+});
+</script>
+
+<!-- tabsets -->
+
+<style type="text/css">
+.tabset-dropdown > .nav-tabs {
+  display: inline-table;
+  max-height: 500px;
+  min-height: 44px;
+  overflow-y: auto;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.tabset-dropdown > .nav-tabs > li.active:before, .tabset-dropdown > .nav-tabs.nav-tabs-open:before {
+  content: "\e259";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li.active:before {
+  content: "\e258";
+  font-family: 'Glyphicons Halflings';
+  border: none;
+}
+
+.tabset-dropdown > .nav-tabs > li.active {
+  display: block;
+}
+
+.tabset-dropdown > .nav-tabs > li > a,
+.tabset-dropdown > .nav-tabs > li > a:focus,
+.tabset-dropdown > .nav-tabs > li > a:hover {
+  border: none;
+  display: inline-block;
+  border-radius: 4px;
+  background-color: transparent;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li {
+  display: block;
+  float: none;
+}
+
+.tabset-dropdown > .nav-tabs > li {
+  display: none;
+}
+</style>
+
+<!-- code folding -->
+
+
+
+<style type="text/css">
+
+#TOC {
+  margin: 25px 0px 20px 0px;
+}
+@media (max-width: 768px) {
+#TOC {
+  position: relative;
+  width: 100%;
+}
+}
+
+@media print {
+.toc-content {
+  /* see https://github.com/w3c/csswg-drafts/issues/4434 */
+  float: right;
+}
+}
+
+.toc-content {
+  padding-left: 30px;
+  padding-right: 40px;
+}
+
+div.main-container {
+  max-width: 1200px;
+}
+
+div.tocify {
+  width: 20%;
+  max-width: 260px;
+  max-height: 85%;
+}
+
+@media (min-width: 768px) and (max-width: 991px) {
+  div.tocify {
+    width: 25%;
+  }
+}
+
+@media (max-width: 767px) {
+  div.tocify {
+    width: 100%;
+    max-width: none;
+  }
+}
+
+.tocify ul, .tocify li {
+  line-height: 20px;
+}
+
+.tocify-subheader .tocify-item {
+  font-size: 0.90em;
+}
+
+.tocify .list-group-item {
+  border-radius: 0px;
+}
+
+
+</style>
+
+
+
+</head>
+
+<body>
+
+
+<div class="container-fluid main-container">
+
+
+<!-- setup 3col/9col grid for toc_float and main content  -->
+<div class="row">
+<div class="col-xs-12 col-sm-4 col-md-3">
+<div id="TOC" class="tocify">
+</div>
+</div>
+
+<div class="toc-content col-xs-12 col-sm-8 col-md-9">
+
+
+
+
+<div class="navbar navbar-default  navbar-fixed-top" role="navigation">
+  <div class="container">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-bs-toggle="collapse" data-target="#navbar" data-bs-target="#navbar">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="index.html">BLAST</a>
+    </div>
+    <div id="navbar" class="navbar-collapse collapse">
+      <ul class="nav navbar-nav">
+        <li>
+  <a href="index.html">Home</a>
+</li>
+<li>
+  <a href="basic_BLAST.html">Basic BLAST</a>
+</li>
+      </ul>
+      <ul class="nav navbar-nav navbar-right">
+        
+      </ul>
+    </div><!--/.nav-collapse -->
+  </div><!--/.container -->
+</div><!--/.navbar -->
+
+<div id="header">
+
+
+
+<h1 class="title toc-ignore">Basic BLAST</h1>
+
+</div>
+
+
+<hr />
+<p>Author: Jia Liu</p>
+<p>Date: 12/10/2023</p>
+<hr />
+<p><br></p>
+<div id="overview" class="section level1" number="1">
+<h1><span class="header-section-number">1</span> Overview</h1>
+<p><br></p>
+<div id="run-blast-on-ncbi-website" class="section level2" number="1.1">
+<h2><span class="header-section-number">1.1</span> Run BLAST on NCBI
+website</h2>
+<p><br></p>
+<p>Suppose after days of hard working, you generated a nucleotide
+sequence that might of interest:</p>
+<p><img src="images/seq_1.png" style="width:100.0%" /></p>
+<p>You would like to know what gene it is, which organism it is from…
+You can easily get all these information through a BLAST on the <a
+href="https://blast.ncbi.nlm.nih.gov/Blast.cgi">NCBI BLAST website</a>.
+Let’s copy and paste this gene, and try the online BLAST.</p>
+<p>It takes a little while to BLAST one gene against NCBI
+<code>nt</code> database. <code>nt</code> is a big nucleotide collection
+consists of annotated nucleotide sequences from multiple sources. But
+maybe you are interested in searching a big amount of gene sequences
+from a specific local database that you defined. It may be trivial to do
+this search on the BLAST web browser then. That’s when the command line
+BLAST may become more helpful. And today we will go through this process
+together.</p>
+<p><br></p>
+</div>
+<div id="command-line-blast" class="section level2" number="1.2">
+<h2><span class="header-section-number">1.2</span> Command line
+BLAST</h2>
+<p><br></p>
+<p>Today we will mainly focuing on how to perform BLAST through command
+line. Let’s copy the material for this workshop to our home
+directory:</p>
+<pre class="bash"><code>cp -r /work/adina/liu2040/BLAST_workshop_materials/ ~
+
+cd ~/BLAST_workshop_materials
+
+ls -R</code></pre>
+<p>Output:</p>
+<p><img src="images/folder_content.png" style="width:100.0%" /></p>
+<p>I collected 20 genes that are related to Nitric Oxide Reductase
+(norB), and I plan to make a local database with these 20 genes. These
+genes are in the file
+<code>/home/liu2040/BLAST_workshop_materials/norB_DB/example_20_norB.fa</code>.</p>
+<p><br></p>
+<p>After building the local norB database with the 20 norB genes, we
+will go though BLAST by doing two projects today:</p>
+<ul>
+<li>Project 1. Understand BLAST with small datasets</li>
+</ul>
+<p>I obtained one nucleotide sequence from my experiments, I want to see
+if the sequence is related with the norB genes in my local norB
+database. So the task is to align
+<code>/home/liu2040/BLAST_workshop_materials/project_1_search_one_seq_to_norB/one_seq.fa</code>
+to the norB database we built.</p>
+<ul>
+<li>Project 2. Apply BLAST on real datasets</li>
+</ul>
+<p>I have one agricultural soil metagenome file
+(<code>/work/adina/soil_metagenomes/mgrast_258_agricultural_soil_metag_299.1/mgm4811960.3_299.1.fa</code>),
+and I want to check if any sequences within this metagenome is
+associated with the norB genes in my local database. So the task this
+time is to align the metagenome against the local norB database.</p>
+<p><br></p>
+</div>
+</div>
+<div id="project-1.-understand-blast-with-small-datasets"
+class="section level1" number="2">
+<h1><span class="header-section-number">2</span> Project 1. Understand
+BLAST with small datasets</h1>
+<p><br></p>
+<div id="make-a-local-blast-database-with-makeblastdb"
+class="section level2" number="2.1">
+<h2><span class="header-section-number">2.1</span> Make a local BLAST
+database with <code>makeblastdb</code></h2>
+<p><br></p>
+<p>Let’s first go to the folder with the file of 20 norB gene sequences
+and have a look at the gene IDs:</p>
+<pre class="bash"><code>cd norB_DB/
+
+grep &#39;^&gt;&#39; example_20_norB.fa</code></pre>
+<p>We will now make a local database for these 20 norB genes:</p>
+<pre class="bash"><code>makeblastdb -in example_20_norB.fa -dbtype nucl -out example_20_norB.fa
+
+ls</code></pre>
+<p><br></p>
+</div>
+<div id="blast-sequences-against-the-local-database"
+class="section level2" number="2.2">
+<h2><span class="header-section-number">2.2</span> BLAST sequences
+against the local database</h2>
+<p><br></p>
+<p>Navigate to project 1 directory by:</p>
+<pre class="bash"><code>#cd /home/liu2040/BLAST_workshop_materials/project_1_search_one_seq_to_norB
+
+# Or
+cd ../project_1_search_one_seq_to_norB
+
+ls
+
+cat one_seq.fa</code></pre>
+<p>This one sequence is the query sequence that we are going to align
+against the local norB database. I would suggest something like the
+following variables, note that the -outfmt 6 flag identifies a tabular
+output:</p>
+<pre class="bash"><code># Usage: blastn -query &lt;seq / metag file&gt; -db &lt;db file&gt; -out &lt;name of output&gt; -outfmt 6
+
+blastn -query one_seq.fa -db ../norB_DB/example_20_norB.fa -out blastOut_oneSeq_to_norB_DB.m8 -outfmt 6</code></pre>
+<p>Let’s get some basic information about the blast output file
+<code>blastOut_oneSeq_to_norB_DB.m8</code>:</p>
+<p><img src="images/small_blast.png" style="width:100.0%" /></p>
+<p>The column headers of our BLAST output are as below:</p>
+<p><code>qseqid sseqid pident length mismatch gapopen qstart qend sstart send evalue bitscore</code></p>
+<p>You can find more information about <code>-outfmt 6</code> format
+from this <a
+href="https://sites.google.com/site/wiki4metagenomics/tools/blast/blastn-output-format-6">webpage</a>.</p>
+<p>Alright, you just did your first BLAST through command line,
+congratulations!</p>
+<p><br></p>
+</div>
+</div>
+<div id="project-2.-apply-blast-on-real-datasets" class="section level1"
+number="3">
+<h1><span class="header-section-number">3</span> Project 2. Apply BLAST
+on real datasets</h1>
+<p><br></p>
+<p>Now it’s time to work on some real-world data! Let’s first navigate
+to the project 2 directory:</p>
+<pre class="bash"><code>cd ../project_2_search_soilMetag_to_norB/
+
+ls</code></pre>
+<p>This directory is empty. Our goal at this step is to search an
+agricultural soil metagenome against the norB database we created in
+project 1 based on the 20 norB genes I collected. The soil metagenome is
+stored at
+<code>/work/adina/soil_metagenomes/mgrast_258_agricultural_soil_metag_299.1/mgm4811960.3_299.1.fa</code>.
+We can get the total number of sequences within this file by:</p>
+<pre class="bash"><code>grep &#39;^&gt;&#39; /work/adina/soil_metagenomes/mgrast_258_agricultural_soil_metag_299.1/mgm4811960.3_299.1.fa | wc -l</code></pre>
+<p>Output: 2865807</p>
+<p>That sounds like a large number of sequences, which is quite common
+to expect for soil metagenomes! And now these sequences in the
+metagenome file will be our query sequences, and will be searched
+against the norB gene database we created earlier.</p>
+<p><br></p>
+<div id="make-a-local-blast-database-with-makeblastdb-1"
+class="section level2" number="3.1">
+<h2><span class="header-section-number">3.1</span> Make a local BLAST
+database with <code>makeblastdb</code></h2>
+<p><br></p>
+<p>In this section, we will use the local database we made with the 20
+norB genes earlier:</p>
+<pre class="bash"><code>ls ../norB_DB/</code></pre>
+<p><br></p>
+</div>
+<div id="blast-sequences-against-the-local-database-1"
+class="section level2" number="3.2">
+<h2><span class="header-section-number">3.2</span> BLAST sequences
+against the local database</h2>
+<p><br></p>
+<p>Let’s now blast the agricultural soil metagenome
+<code>/work/adina/soil_metagenomes/mgrast_258_agricultural_soil_metag_299.1/mgm4811960.3_299.1.fa</code>
+against the norB database:</p>
+<pre class="bash"><code># Usage: blastn -query &lt;seq / metag file&gt; -db &lt;db file&gt; -out &lt;name of output&gt; -outfmt 6
+
+blastn -query /work/adina/soil_metagenomes/mgrast_258_agricultural_soil_metag_299.1/mgm4811960.3_299.1.fa -db ../norB_DB/example_20_norB.fa -out blastOut_mgm4811960.3_299.1.fa_to_norB_DB.m8 -outfmt 6</code></pre>
+<p>This step may take several minutes, but imagine we need to search
+each of the 2865807 sequences from the soil metagenome file against our
+local norB database which contains 20 norB genes …</p>
+<p>After the BLAST process is finished, you should see the output file
+<code>blastOut_mgm4811960.3_299.1.fa_to_norB_DB.m8</code>. If the file
+is empty, it means that none of the sequences from the soil metagenomes
+were aligned with any of the norB genes in our database. If not, some
+sequences from the metagenome file were somewhat similar with some norB
+genes in our database!</p>
+<p><br></p>
+</div>
+</div>
+<div id="process-blast-output" class="section level1" number="4">
+<h1><span class="header-section-number">4</span> Process BLAST
+output</h1>
+<p><br></p>
+<div id="basic-explore" class="section level2" number="4.1">
+<h2><span class="header-section-number">4.1</span> Basic explore</h2>
+<p><br></p>
+<p>You can always see how the BLAST output looks like, or how many lines
+of results it generated by:</p>
+<pre class="bash"><code>wc -l blastOut_mgm4811960.3_299.1.fa_to_norB_DB.m8</code></pre>
+<p>Output: 20</p>
+<pre class="bash"><code>head blastOut_mgm4811960.3_299.1.fa_to_norB_DB.m8</code></pre>
+<p>Output:</p>
+<p><img src="images/blast_out.png" style="width:100.0%" /></p>
+<p>Again, the column headers for BLAST output with
+<code>-outfmt 6</code> format are as below:</p>
+<p><code>qseqid sseqid pident length mismatch gapopen qstart qend sstart send evalue bitscore</code></p>
+<p>The raw output directly resulted from BLAST analysis often needs to
+be further processed before you can really use them for further analysis
+or draw conclusions. Why? You may see some problems from the raw
+output:</p>
+<ul>
+<li><p>Although some query sequences aligned to some genes from the
+database, their mapping / aligning parameters are low and may not reach
+your expectation. E.g., The percentage of identity (column 3) between
+the two sequences is just <span class="math inline">\(76.056\%\)</span>,
+but you want them to be at least <span
+class="math inline">\(90\%\)</span> similar with each other.</p></li>
+<li><p>The same query sequence (<code>qseqid</code> in column 1) may hit
+multiple different sequences from the database being used
+(<code>sseqid</code> in column 2). This is because that query sequence
+may have some levels of similarity with not just one, but multiple
+sequences from the database. In some situations, you may want all the
+database genes that have a certain level of similarity with you query
+sequence. But under some other scenarios, you may only be interetsed in
+the database gene that most alike with your query sequence.</p></li>
+</ul>
+<p><strong>So, some filtering and processing may need to be performed on
+the raw BLAST output!</strong></p>
+<p><br></p>
+</div>
+<div id="some-directions-for-processing-the-raw-blast-output"
+class="section level2" number="4.2">
+<h2><span class="header-section-number">4.2</span> Some directions for
+processing the raw BLAST output</h2>
+<p><br></p>
+<p>In this section, the codes are not the most important as they may
+change quite a lot based on different situations in different projects.
+But I want to point you to some directions to think about when you have
+some raw BLAST output.</p>
+<p><br></p>
+<div id="filtering-based-on-some-columns-of-interest"
+class="section level3" number="4.2.1">
+<h3><span class="header-section-number">4.2.1</span> Filtering based on
+some columns of interest</h3>
+<p><br></p>
+<p>Like we discussed above, for a raw BLAST output, you may want to keep
+the hits or rows with some specific thresholds on specific columns. For
+example, if I want the hits with evalue (column 11) &lt; 0.00001 and
+percentage of identity (column 3) &gt;= a threshold of 90:</p>
+<pre class="bash"><code>awk &#39;{ if ($3 &gt;= 90 &amp;&amp; $11 &lt; 0.00001) {print} }&#39; blastOut_mgm4811960.3_299.1.fa_to_norB_DB.m8 &gt; eval5floats_pident90_filtered_blastOut_mgm4811960.3_299.1.fa_to_norB_DB.m8</code></pre>
+<p><br></p>
+</div>
+<div id="get-the-best-hits" class="section level3" number="4.2.2">
+<h3><span class="header-section-number">4.2.2</span> Get the best
+hit(s)</h3>
+<p><br></p>
+<p>In our case of BLASTing metagenome sequences against the 20 norB
+genes, for each query sequence (metagenome; column 1), I want to know
+the “best” norB gene (column 2) that it is most similar with although it
+may be similar to multiple norB genes. So what I will do is:</p>
+<ul>
+<li>first get and save all the unique query sequences in an array</li>
+</ul>
+<pre class="bash"><code>mapfile -t my_array &lt; &lt;(cut -f 1 eval5floats_pident90_filtered_blastOut_mgm4811960.3_299.1.fa_to_norB_DB.m8 | sort | uniq);</code></pre>
+<ul>
+<li>for each query sequence saved in the above array, only find the norB
+gene that it is mostly alike</li>
+</ul>
+<p>Note: In the case of one query sequence (column 1) aligned to
+multiple database sequences (column 2), BLAST will by default rank the
+hits or rows from the best aligned to the worst one based on the
+<code>evalue</code> column. So, the top database gene will be the best
+hit for a query sequence if more than one database gene exist.</p>
+<pre class="bash"><code>for i in &quot;${my_array[@]}&quot;;
+do
+    new_i=$(echo $i | sed &#39;s/\[/\\[/g&#39; | sed &#39;s/\]/\\]/g&#39;);
+    grep -m 1 &quot;$new_i&quot; eval5floats_pident90_filtered_blastOut_mgm4811960.3_299.1.fa_to_norB_DB.m8 &gt;&gt; bestHits_eval5floats_pident90_filtered_blastOut_mgm4811960.3_299.1.fa_to_norB_DB.m8;
+done
+
+# the `new_i` variable is necessary to generate, since some query name may contains &quot;[&quot; or &quot;]&quot;, and `grep` cannot find such patterns</code></pre>
+<p><br></p>
+</div>
+<div id="summary" class="section level3" number="4.2.3">
+<h3><span class="header-section-number">4.2.3</span> Summary</h3>
+<p>Hopefully now you have some ideas about how to process the BLAST
+output. Keep in mind that for different projects, the columns and
+thresholds to be used for filtering or the best hit(s) you want may be
+very different!</p>
+<p><br></p>
+</div>
+</div>
+</div>
+
+
+
+</div>
+</div>
+
+</div>
+
+<script>
+
+// add bootstrap table styles to pandoc tables
+function bootstrapStylePandocTables() {
+  $('tr.odd').parent('tbody').parent('table').addClass('table table-condensed');
+}
+$(document).ready(function () {
+  bootstrapStylePandocTables();
+});
+
+
+</script>
+
+<!-- tabsets -->
+
+<script>
+$(document).ready(function () {
+  window.buildTabsets("TOC");
+});
+
+$(document).ready(function () {
+  $('.tabset-dropdown > .nav-tabs > li').click(function () {
+    $(this).parent().toggleClass('nav-tabs-open');
+  });
+});
+</script>
+
+<!-- code folding -->
+
+<script>
+$(document).ready(function ()  {
+
+    // temporarily add toc-ignore selector to headers for the consistency with Pandoc
+    $('.unlisted.unnumbered').addClass('toc-ignore')
+
+    // move toc-ignore selectors from section div to header
+    $('div.section.toc-ignore')
+        .removeClass('toc-ignore')
+        .children('h1,h2,h3,h4,h5').addClass('toc-ignore');
+
+    // establish options
+    var options = {
+      selectors: "h1,h2,h3",
+      theme: "bootstrap3",
+      context: '.toc-content',
+      hashGenerator: function (text) {
+        return text.replace(/[.\\/?&!#<>]/g, '').replace(/\s/g, '_');
+      },
+      ignoreSelector: ".toc-ignore",
+      scrollTo: 0
+    };
+    options.showAndHide = true;
+    options.smoothScroll = true;
+
+    // tocify
+    var toc = $("#TOC").tocify(options).data("toc-tocify");
+});
+</script>
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>

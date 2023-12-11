@@ -1,0 +1,687 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<meta charset="utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+
+
+
+<title>Basic BLAST Workshop on Iowa State University Nova clusters</title>
+
+<script src="site_libs/header-attrs-2.25/header-attrs.js"></script>
+<script src="site_libs/jquery-3.6.0/jquery-3.6.0.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link href="site_libs/bootstrap-3.3.5/css/sandstone.min.css" rel="stylesheet" />
+<script src="site_libs/bootstrap-3.3.5/js/bootstrap.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/respond.min.js"></script>
+<style>h1 {font-size: 34px;}
+       h1.title {font-size: 38px;}
+       h2 {font-size: 30px;}
+       h3 {font-size: 24px;}
+       h4 {font-size: 18px;}
+       h5 {font-size: 16px;}
+       h6 {font-size: 12px;}
+       code {color: inherit; background-color: rgba(0, 0, 0, 0.04);}
+       pre:not([class]) { background-color: white }</style>
+<script src="site_libs/jqueryui-1.13.2/jquery-ui.min.js"></script>
+<link href="site_libs/tocify-1.9.1/jquery.tocify.css" rel="stylesheet" />
+<script src="site_libs/tocify-1.9.1/jquery.tocify.js"></script>
+<script src="site_libs/navigation-1.1/tabsets.js"></script>
+<link href="site_libs/highlightjs-9.12.0/default.css" rel="stylesheet" />
+<script src="site_libs/highlightjs-9.12.0/highlight.js"></script>
+
+<style type="text/css">
+  code{white-space: pre-wrap;}
+  span.smallcaps{font-variant: small-caps;}
+  span.underline{text-decoration: underline;}
+  div.column{display: inline-block; vertical-align: top; width: 50%;}
+  div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+  ul.task-list{list-style: none;}
+    </style>
+
+<style type="text/css">code{white-space: pre;}</style>
+<script type="text/javascript">
+if (window.hljs) {
+  hljs.configure({languages: []});
+  hljs.initHighlightingOnLoad();
+  if (document.readyState && document.readyState === "complete") {
+    window.setTimeout(function() { hljs.initHighlighting(); }, 0);
+  }
+}
+</script>
+
+
+
+
+
+
+<link rel="stylesheet" href="style.css" type="text/css" />
+
+
+
+<style type = "text/css">
+.main-container {
+  max-width: 940px;
+  margin-left: auto;
+  margin-right: auto;
+}
+img {
+  max-width:100%;
+}
+.tabbed-pane {
+  padding-top: 12px;
+}
+.html-widget {
+  margin-bottom: 20px;
+}
+button.code-folding-btn:focus {
+  outline: none;
+}
+summary {
+  display: list-item;
+}
+details > summary > p:only-child {
+  display: inline;
+}
+pre code {
+  padding: 0;
+}
+</style>
+
+
+<style type="text/css">
+.dropdown-submenu {
+  position: relative;
+}
+.dropdown-submenu>.dropdown-menu {
+  top: 0;
+  left: 100%;
+  margin-top: -6px;
+  margin-left: -1px;
+  border-radius: 0 6px 6px 6px;
+}
+.dropdown-submenu:hover>.dropdown-menu {
+  display: block;
+}
+.dropdown-submenu>a:after {
+  display: block;
+  content: " ";
+  float: right;
+  width: 0;
+  height: 0;
+  border-color: transparent;
+  border-style: solid;
+  border-width: 5px 0 5px 5px;
+  border-left-color: #cccccc;
+  margin-top: 5px;
+  margin-right: -10px;
+}
+.dropdown-submenu:hover>a:after {
+  border-left-color: #adb5bd;
+}
+.dropdown-submenu.pull-left {
+  float: none;
+}
+.dropdown-submenu.pull-left>.dropdown-menu {
+  left: -100%;
+  margin-left: 10px;
+  border-radius: 6px 0 6px 6px;
+}
+</style>
+
+<script type="text/javascript">
+// manage active state of menu based on current page
+$(document).ready(function () {
+  // active menu anchor
+  href = window.location.pathname
+  href = href.substr(href.lastIndexOf('/') + 1)
+  if (href === "")
+    href = "index.html";
+  var menuAnchor = $('a[href="' + href + '"]');
+
+  // mark the anchor link active (and if it's in a dropdown, also mark that active)
+  var dropdown = menuAnchor.closest('li.dropdown');
+  if (window.bootstrap) { // Bootstrap 4+
+    menuAnchor.addClass('active');
+    dropdown.find('> .dropdown-toggle').addClass('active');
+  } else { // Bootstrap 3
+    menuAnchor.parent().addClass('active');
+    dropdown.addClass('active');
+  }
+
+  // Navbar adjustments
+  var navHeight = $(".navbar").first().height() + 15;
+  var style = document.createElement('style');
+  var pt = "padding-top: " + navHeight + "px; ";
+  var mt = "margin-top: -" + navHeight + "px; ";
+  var css = "";
+  // offset scroll position for anchor links (for fixed navbar)
+  for (var i = 1; i <= 6; i++) {
+    css += ".section h" + i + "{ " + pt + mt + "}\n";
+  }
+  style.innerHTML = "body {" + pt + "padding-bottom: 40px; }\n" + css;
+  document.head.appendChild(style);
+});
+</script>
+
+<!-- tabsets -->
+
+<style type="text/css">
+.tabset-dropdown > .nav-tabs {
+  display: inline-table;
+  max-height: 500px;
+  min-height: 44px;
+  overflow-y: auto;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.tabset-dropdown > .nav-tabs > li.active:before, .tabset-dropdown > .nav-tabs.nav-tabs-open:before {
+  content: "\e259";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li.active:before {
+  content: "\e258";
+  font-family: 'Glyphicons Halflings';
+  border: none;
+}
+
+.tabset-dropdown > .nav-tabs > li.active {
+  display: block;
+}
+
+.tabset-dropdown > .nav-tabs > li > a,
+.tabset-dropdown > .nav-tabs > li > a:focus,
+.tabset-dropdown > .nav-tabs > li > a:hover {
+  border: none;
+  display: inline-block;
+  border-radius: 4px;
+  background-color: transparent;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li {
+  display: block;
+  float: none;
+}
+
+.tabset-dropdown > .nav-tabs > li {
+  display: none;
+}
+</style>
+
+<!-- code folding -->
+
+
+
+<style type="text/css">
+
+#TOC {
+  margin: 25px 0px 20px 0px;
+}
+@media (max-width: 768px) {
+#TOC {
+  position: relative;
+  width: 100%;
+}
+}
+
+@media print {
+.toc-content {
+  /* see https://github.com/w3c/csswg-drafts/issues/4434 */
+  float: right;
+}
+}
+
+.toc-content {
+  padding-left: 30px;
+  padding-right: 40px;
+}
+
+div.main-container {
+  max-width: 1200px;
+}
+
+div.tocify {
+  width: 20%;
+  max-width: 260px;
+  max-height: 85%;
+}
+
+@media (min-width: 768px) and (max-width: 991px) {
+  div.tocify {
+    width: 25%;
+  }
+}
+
+@media (max-width: 767px) {
+  div.tocify {
+    width: 100%;
+    max-width: none;
+  }
+}
+
+.tocify ul, .tocify li {
+  line-height: 20px;
+}
+
+.tocify-subheader .tocify-item {
+  font-size: 0.90em;
+}
+
+.tocify .list-group-item {
+  border-radius: 0px;
+}
+
+
+</style>
+
+
+
+</head>
+
+<body>
+
+
+<div class="container-fluid main-container">
+
+
+<!-- setup 3col/9col grid for toc_float and main content  -->
+<div class="row">
+<div class="col-xs-12 col-sm-4 col-md-3">
+<div id="TOC" class="tocify">
+</div>
+</div>
+
+<div class="toc-content col-xs-12 col-sm-8 col-md-9">
+
+
+
+
+<div class="navbar navbar-default  navbar-fixed-top" role="navigation">
+  <div class="container">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-bs-toggle="collapse" data-target="#navbar" data-bs-target="#navbar">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="index.html">BLAST</a>
+    </div>
+    <div id="navbar" class="navbar-collapse collapse">
+      <ul class="nav navbar-nav">
+        <li>
+  <a href="index.html">Home</a>
+</li>
+<li>
+  <a href="basic_BLAST.html">Basic BLAST</a>
+</li>
+      </ul>
+      <ul class="nav navbar-nav navbar-right">
+        
+      </ul>
+    </div><!--/.nav-collapse -->
+  </div><!--/.container -->
+</div><!--/.navbar -->
+
+<div id="header">
+
+
+
+<h1 class="title toc-ignore">Basic BLAST Workshop on Iowa State
+University Nova clusters</h1>
+
+</div>
+
+
+<hr />
+<div id="welcome-everyone" class="section level3">
+<h3>Welcome everyone!</h3>
+<p><br></p>
+<p>Today we will go through some basic processes of BLAST on the Nova
+High Performance Computing (HPC) clusters of Iowa State University
+(ISU).</p>
+<hr />
+</div>
+<div id="what-is-blast" class="section level2">
+<h2>What is BLAST?</h2>
+<p><br></p>
+<p><img src="images/blast.png" style="width:100.0%" /> <br></p>
+<p>From Wikipedia:</p>
+<p>“BLAST (basic local alignment search tool) is an algorithm and
+program for aligning and comparing primary biological sequence
+information, such as the amino-acid sequences of proteins or the
+nucleotides of DNA and/or RNA sequences.</p>
+<p>A BLAST search enables a researcher to compare a subject protein or
+nucleotide sequence (called a query) with a library or database of
+sequences, and identify library sequences that resemble the query
+sequence above a certain threshold.”</p>
+<p>In this workshop, we will go through the basic workflow of BLAST.
+More specifically, we will learn how to compare and search some
+sequences (query) against a library or database of other sequences.</p>
+<p><br></p>
+</div>
+<div id="preparation" class="section level2">
+<h2>Preparation</h2>
+<p><br></p>
+<div id="work-on-hpc" class="section level3">
+<h3>Work on HPC</h3>
+<p><br></p>
+<div
+id="login-the-nova-high-performance-computing-hpc-clusters-of-iowa-state-university-isu."
+class="section level4">
+<h4>Login the Nova High Performance Computing (HPC) clusters of Iowa
+State University (ISU).</h4>
+<p><br></p>
+<p>You are already familiar with the ISU Nova hpc. Let’s log on to it
+(<a
+href="https://jialiu232.github.io/Shell_101_tutorial_2023Dec/index.html#Regular_Login_to_Nova_cluster">instruction
+for logging in</a>)!</p>
+<p><br></p>
+</div>
+<div
+id="request-the-allocation-of-computing-resources-for-your-work-on-hpc"
+class="section level4">
+<h4>Request the allocation of computing resources for your work on
+HPC</h4>
+<p><br></p>
+<p>After logging onto the Nova HPC, you will be sharing computing
+resources with other users in the HPC system. You can see the detailed
+information of computing resources through the <code>sinfo</code>
+function. While there is no problem running normal or small commands
+using the shared public nodes, running heavy tasks that requests many
+resources for computing may slow down and influence the performance of
+HPC for all the users. And you will probably be yelled at :( !</p>
+<p>One of the solution is to request the allocation of computing
+resources for your own work. You can request some resources for a
+certain amount of time using <code>salloc</code> function. For example,
+let’s schedule and get on 1 node (defined by <code>-N</code>), with 10
+processors on each node (defined by <code>--ntasks-per-node</code>), for
+6 hours (defined by <code>-t</code>):</p>
+<pre class="bash"><code>salloc -N 1 --ntasks-per-node 10 -t 6:00:00</code></pre>
+<p>After performing your computing on the requested resources, you can
+exit the resources by <code>exit</code> command.</p>
+<p><br></p>
+</div>
+</div>
+<div id="hpc-functions-and-path" class="section level3">
+<h3>HPC functions and PATH</h3>
+<p><br></p>
+<div id="absolute-path-vs.-relative-path" class="section level4">
+<h4>Absolute path Vs. relative path</h4>
+<p><br></p>
+<ul>
+<li>Absolute path: describes the location from the root directory</li>
+</ul>
+<p><code>/work/adina</code> is an absolute path / the full path of Germs
+lab directory on the hpc. You can always visit a directory with its full
+path:</p>
+<pre class="bash"><code>cd /work/adina</code></pre>
+<p><code>ls</code> will list all the files and sub-directories in the
+current working directory. In <code>/work/adina</code>, you can see some
+files, and some directories belong to some of our lab members, e.g.,
+<code>millican</code>, <code>jae</code>, <code>liu2020</code>, and so
+on. You can go to the sub-directory relative to our current working
+directory by <code>cd</code> to the relative path.</p>
+<ul>
+<li>Relative path: describes the location of a file relative to the
+current (working) directory.</li>
+</ul>
+<p><strong><code>.</code> represents the current directory you are
+at</strong></p>
+<p>We can visit the sub-directory <code>liu2040</code> in
+<code>/work/adina</code> by:</p>
+<pre class="bash"><code>cd ./liu2040
+
+# check the current directory
+pwd
+
+# list contents in `/work/adina/liu2040`
+ls</code></pre>
+<p>Often times in relative directory, the <code>.</code> which
+represents the current directory can be omitted. So
+<code>cd ./liu2040</code> is the same with <code>cd liu2040</code>.</p>
+<p><strong><code>..</code> represents the parent directory / the
+directory one level up</strong></p>
+<p>While we are in the <code>/work/adina/liu2040</code>, we know
+<code>millican</code> is another sub-directory in
+<code>/work/adina</code>. We can list the contents of
+<code>millican</code> while still locate at <code>liu2040</code> using
+the relative path by:</p>
+<pre class="bash"><code>ls ../millican
+
+# check current working directory
+pwd</code></pre>
+<p>We can go back to the parent directory of the current one by:</p>
+<pre class="bash"><code>cd ..
+
+# check the current directory
+pwd</code></pre>
+<ul>
+<li>Summary</li>
+</ul>
+<p>Generally, either absolute or relative path is needed while referring
+to or calling any files / directories / functions on HPC. If you are at
+your home directory, but call the <code>millican</code> directory:</p>
+<pre class="bash"><code># Go to your home directory
+cd ~
+
+# Show the current working directory
+pwd
+
+# List all the contents in your home directory
+ls
+
+# List contents in the millican directory
+ls millican</code></pre>
+<p>You will probably get some error:
+<code>ls: cannot access 'millican': No such file or directory</code>.
+But it would work if you use the absolute / full path:</p>
+<pre class="bash"><code>ls /work/adina/millican</code></pre>
+<p><br></p>
+</div>
+<div id="get-the-absolute-path-of-a-shell-function"
+class="section level4">
+<h4>Get the absolute path of a Shell function</h4>
+<p><br></p>
+<p>We are now familiar with some Shell functions, such as
+<code>ls</code>, <code>pwd</code> and <code>cd</code>. The files that
+encode each of these functions are stored somewhere on the Shell, you
+can find the absolute path of a function by
+<code>which FUNCTION_NAME</code>:</p>
+<pre class="bash"><code>which cd
+
+# Or
+which pwd</code></pre>
+<p>These functions are stored at <code>/usr/bin</code>. But why here we
+can directly call each of these functions, such as <code>ls</code> or
+<code>pwd</code>, without using their full path, e,g,
+<code>/usr/bin/ls</code>? It turns out that there is an environment
+variable, <code>PATH</code>, on the linux system that was stored with
+some paths. When a function or file is called without any absolute or
+relative paths, the linux system will automatically check if the
+function or file exists in any of the paths in the <code>PATH</code>
+variable and use the corresponding one if exists.</p>
+<p>We may guess that the parent folder paths of <code>ls</code>,
+<code>cd</code>, or common linux functions are saved in the
+<code>PATH</code> variable, and that’s why we can directly call these
+functions. We can check the value (saved paths) of <code>PATH</code>
+variable by:</p>
+<pre class="bash"><code>echo $PATH</code></pre>
+<p>Output for me:</p>
+<pre class="bash"><code>/usr/local/bin:/usr/bin:/usr/local/sbin:/usr/sbin:/usr/local/cuda/bin:/home/liu2040/.local/bin:/home/liu2040/bin</code></pre>
+<p><code>:</code> is the separators of different paths. And you should
+be able to find <code>/usr/bin/</code> the parent directory path of
+<code>ls</code> and <code>pwd</code> from the output above. The good
+thing is you can edit and add more paths to <code>PATH</code>, which
+will make calling your commonly used functions easier.</p>
+<p><br></p>
+</div>
+</div>
+<div id="install-and-set-up-blast-on-your-nova-hpc"
+class="section level3">
+<h3>Install and set up BLAST on your Nova HPC</h3>
+<p><br></p>
+<div id="download-and-install-blast" class="section level4">
+<h4>Download and install BLAST</h4>
+<p><br></p>
+<p>We need to download and install the BLAST package before using it. I
+am going to go back to the home directory, make a new folder
+<code>tools</code>, and set up BLAST there:</p>
+<pre class="bash"><code>cd ~
+mkdir tools
+ls    # you should be able to see your tools folder
+
+# go to the tools folder
+cd tools</code></pre>
+<ul>
+<li>Download BLAST</li>
+</ul>
+<p>Let’s download the compressed BLAST package:</p>
+<pre class="bash"><code>wget https://ftp.ncbi.nlm.nih.gov/blast/executables/LATEST/ncbi-blast-2.15.0+-x64-linux.tar.gz</code></pre>
+<p>Find more BLAST package download and install information from <a
+href="https://www.ncbi.nlm.nih.gov/books/NBK569861/">here</a>.</p>
+<ul>
+<li>Install BLAST</li>
+</ul>
+<p>We can install BLAST by extracting the downloaded compressed package
+with tar command:</p>
+<pre class="bash"><code>tar -xvf ncbi-blast-2.15.0+-x64-linux.tar.gz    # extract from the compressed package</code></pre>
+<p><strong>Command syntax</strong>: utility/command flag argument</p>
+<ol style="list-style-type: decimal">
+<li><p>Utility/Command: The command you run to do your work, e.g.,
+<code>tar</code></p></li>
+<li><p>Flag: Options or preferences for commands; commands may use
+default settings if flags are not defined; Flag normally starts with one
+or two dashes <code>-</code> which depends on the command, e.g., -xvf.
+Here <code>-x</code> represents extracting files from an archive;
+<code>-v</code> represents verbosely listing files processed;
+<code>-f</code> means using archive file or device ARCHIVE.</p></li>
+<li><p>Argument: Arguments tell the command exactly what you want for a
+specific action, or the subjects you want to perform an action on. E.g.,
+perform the <code>tar</code> function on file (<code>-f</code>)
+<code>ncbi-blast-2.15.0+-x64-linux.tar.gz</code>.</p></li>
+</ol>
+<p>Okay, now we installed BLAST! Let’s try it out and print the help
+function for <code>blastn</code>:</p>
+<pre class="bash"><code>blastn -help</code></pre>
+<p>Ooops, an error showed up: “-bash: blastn: command not found”. But we
+just did install BLAST! It seems like something is going wrong. Let’s
+see if we can find the path/location of <code>blastn</code> with
+<code>which</code> command:</p>
+<pre class="bash"><code>which blastn</code></pre>
+<p>No path found. I already checked the <code>ncbi-blast-2.15.0+</code>
+folder and know where <code>blastn</code> is stored. Let’s try to call
+“help” for <code>blastn</code> with its path:</p>
+<pre class="bash"><code>/home/liu2040/tools/ncbi-blast-2.15.0+/bin/blastn -help</code></pre>
+<p>A lot of helpful information is showing when we use the full path of
+<code>blastn</code>. Remember the environmental variable
+<code>PATH</code>? Maybe it’s time to add the path of the parent
+directory of <code>blastn</code> to <code>PATH</code>, so that when we
+directly call <code>blastn</code>, the linux system knows where to find
+it.</p>
+<p>Let’s navigate to the actual executable code scripts folder of BLAST,
+and add the path of these scripts to <code>PATH</code>:</p>
+<pre class="bash"><code># navigate to the bin folder under BLAST
+cd /home/liu2040/tools/ncbi-blast-2.15.0+/bin/
+
+ls
+pwd
+
+export PATH=$PATH:/home/liu2040/tools/ncbi-blast-2.15.0+/bin     # Add the path of the tool to the environment variable `PATH`
+echo $PATH</code></pre>
+<p><br></p>
+<hr />
+<p>Awesome! Now we have our BLAST tool set up. We will start the process
+of sequence analysis with BLAST in the next section.</p>
+</div>
+</div>
+</div>
+
+
+
+</div>
+</div>
+
+</div>
+
+<script>
+
+// add bootstrap table styles to pandoc tables
+function bootstrapStylePandocTables() {
+  $('tr.odd').parent('tbody').parent('table').addClass('table table-condensed');
+}
+$(document).ready(function () {
+  bootstrapStylePandocTables();
+});
+
+
+</script>
+
+<!-- tabsets -->
+
+<script>
+$(document).ready(function () {
+  window.buildTabsets("TOC");
+});
+
+$(document).ready(function () {
+  $('.tabset-dropdown > .nav-tabs > li').click(function () {
+    $(this).parent().toggleClass('nav-tabs-open');
+  });
+});
+</script>
+
+<!-- code folding -->
+
+<script>
+$(document).ready(function ()  {
+
+    // temporarily add toc-ignore selector to headers for the consistency with Pandoc
+    $('.unlisted.unnumbered').addClass('toc-ignore')
+
+    // move toc-ignore selectors from section div to header
+    $('div.section.toc-ignore')
+        .removeClass('toc-ignore')
+        .children('h1,h2,h3,h4,h5').addClass('toc-ignore');
+
+    // establish options
+    var options = {
+      selectors: "h1,h2,h3",
+      theme: "bootstrap3",
+      context: '.toc-content',
+      hashGenerator: function (text) {
+        return text.replace(/[.\\/?&!#<>]/g, '').replace(/\s/g, '_');
+      },
+      ignoreSelector: ".toc-ignore",
+      scrollTo: 0
+    };
+    options.showAndHide = true;
+    options.smoothScroll = true;
+
+    // tocify
+    var toc = $("#TOC").tocify(options).data("toc-tocify");
+});
+</script>
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>
