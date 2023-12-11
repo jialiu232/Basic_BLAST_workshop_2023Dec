@@ -9,7 +9,7 @@ navbar:
       href: basic_BLAST.html
 output:
   html_document:
-    theme: sandstone
+    #theme: sandstone
     #css: style.css
     
     

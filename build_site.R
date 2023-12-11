@@ -2,7 +2,7 @@
 #This helps avoid confusion if our working directory is 
 #not our site because of other projects we were 
 #working on at the time. 
-setwd("/Users/liujia/Documents/projects/basic_BLAST_tutorial_2023Dec")
+setwd("~/Documents/workshops/Basic_BLAST_workshop_2023Dec")
 
 #render your sweet site. 
 rmarkdown::render_site()
